@@ -2,7 +2,7 @@ title: It doesn't matter Dev Blog
 email: it.doesnt.matter.blog@gmail.com
 author: Marek G
 description: >-
-  Journal with thoughts, tools and snippets by an ex Software Engineer. May accidentaly serve as a source of tips for anyone who stumbles upon.
+  Thoughts, tools and snippets by an ex Software Engineer
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 
