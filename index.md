@@ -2,4 +2,4 @@
 layout: home
 ---
 
-Category Cloud
+{% include category-list.html %}

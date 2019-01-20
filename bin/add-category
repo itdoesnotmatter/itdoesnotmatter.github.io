@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 mkdir -p $1
-echo -e "---\nlayout: tag-list\ncategory: $1\n---" > $1/index.md
+echo -e "---\nlayout: tag-list\ncategory: $1\ntitle: \"Tags in Category: $1\"\n---" > $1/index.md

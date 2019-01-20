@@ -17,3 +17,6 @@ plugins:
 
 show_excerpts: true
 permalink: pretty
+
+header_pages:
+  - about.md
