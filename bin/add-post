@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+bin/add-category $2
+mkdir -p $2/_posts
+date=`date +'%Y-%m-%d'`
+echo -e "---\nlayout: post\ndate: $date\ncategory: $2\n---" > $2/_posts/$date-$1.md

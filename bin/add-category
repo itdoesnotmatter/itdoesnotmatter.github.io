@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+mkdir -p $1
+echo -e "---\nlayout: tag-list\ncategory: $1\n---" > $1/index.md

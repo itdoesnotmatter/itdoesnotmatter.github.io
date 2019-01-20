@@ -1,0 +1,6 @@
+<h2 class="post-list-heading">Categories</h2>
+<ul class="categories">
+{% for category in site.categories %}
+  <li><a href="{{ category[0] }}/">{{ category[0] }}</a></li>
+{% endfor %}
+</ul>

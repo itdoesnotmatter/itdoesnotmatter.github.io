@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+yaml=""
+dirs=$(find -not -path './vendor/*' -type d -name _posts);
+
+for dir in $dirs; do
+    category=$(printf $dir | cut -f2 -d/)
+
+    # FIXME: assumes there's nothing else than posts in '_posts' dir
+    # FIXME: watch for empty dir
+    for file in $dir/*; do
+        tags=$(sed -n '/^---/,/^---/ {/^tags:/ p}' $file | cut -f2 -d:);
+
+        for tag in $tags; do
+            yaml="$yaml"'\n'"$tag: $category"
+        done;
+    done;
+done
+
+echo -e $yaml | sort -u > _data/tag_map.yml

@@ -3,6 +3,7 @@ email: it.doesnt.matter.blog@gmail.com
 author: Marek G
 description: >-
   Thoughts, tools and snippets by an ex Software Engineer
+
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 
@@ -15,3 +16,4 @@ plugins:
   - jekyll-sitemap
 
 show_excerpts: true
+permalink: pretty
