@@ -5,9 +5,11 @@ description: >-
   Thoughts, tools and snippets by an ex Software Engineer
 
 github_username: itdoesnotmatter
+disqus:
+  shortname: itdoesnotmatter
 
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://itdoesnotmatter.github.io/"
 
 # Build settings
 markdown: kramdown
