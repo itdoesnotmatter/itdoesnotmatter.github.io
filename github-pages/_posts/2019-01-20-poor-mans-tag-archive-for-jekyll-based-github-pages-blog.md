@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: tagged-post
 date: 2019-01-20
 title: "Poor Man's Tag Archive for Jekyll based GitHub Pages Blog"
 category: github-pages

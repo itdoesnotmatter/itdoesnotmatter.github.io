@@ -32,3 +32,4 @@ exclude:
   - Gemfile.lock
   - README.md
   - bin
+  - vendor
