@@ -1,0 +1,51 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <title>Snooker Visual Live Score</title>
+  <meta name="description" content="The HTML5 Herald">
+
+  <!-- <link rel="stylesheet" href="css/styles.css?v=1.0"> -->
+  <script src="js/scripts.js"></script>
+  <style type="text/css">
+    #tableframe, #ytframe { display: inline-block; }
+  </style>
+
+</head>
+
+<body onload="init()">
+    <div id="tableframe">
+        <iframe name="table" src="Snooker_table_drawing_mod.svg" width="300" height="600"></iframe>
+    </div>
+
+    <div id="ytframe">
+    </div>
+
+    <div id="controls">
+        <input type="radio" name="fps" value="1" id="1fps" checked="checked" />
+        <label for="seq_pos">1 FPS</label>
+
+        <input type="radio" name="fps" value="5" id="5fps" />
+        <label for="seq_pos">5 FPS</label>
+
+        <div id="sequence">
+            Current sequence:
+            <label for="seq_pos">Pos</label>
+            <input type="number" name="seq_pos" id="seq_pos" />
+
+            <label for="minutes">Min</label>
+            <input type="number" name="minutes" id="minutes" min="0" max="13" step="1" value="0" onchange="updatePos()" />
+
+            <label for="seconds">Sec</label>
+            <input type="number" name="seconds" id="seconds" min="0" max="59" step="1" value="0" onchange="updatePos()" />
+
+            <button type="button" id="play_button" onclick="svgTable.play()">Play</button>
+            <button type="button" onclick="svgTable.pause()">Pause</button>
+        </div>
+    </div>
+</body>
+
+</html>
