@@ -1,18 +1,18 @@
 svgTable = (function(){
     const coords = {
         5: [
-            [75, 12], [87.5, 12], [100, 12],
-            [75, 43], [87.5, 43], [100, 43],
-            [75, 58.5], [87.5, 58.5], [100, 58.5],
-            [75, 74], [87.5, 74], [100, 74]
+            [55, 12], [67.5, 12], [80, 12],
+            [55, 43], [67.5, 43], [80, 43],
+            [55, 58.5], [67.5, 58.5], [80, 58.5],
+            [55, 74], [67.5, 74], [80, 74]
         ],
         0: [
-            [50, 12],
-            [50, 27.5],
-            [50, 43],
-            [37.5, 58.5], [50, 58.5],
-            [50, 74],
-            [50, 89.5]
+            [30, 12],
+            [30, 27.5],
+            [30, 43],
+            [17.5, 58.5], [30, 58.5],
+            [30, 74],
+            [30, 89.5]
         ]
     };
     const multipliers = {
@@ -36,6 +36,8 @@ svgTable = (function(){
         winningNumber5frequency: 0.7,
         emptyBetFrequency: 0.4,
         moreThanOneFrequency: 0.3,
+        maxStacks: 12,
+        minPerStack: 1,
         maxPerStack: 10,
         maxTotal: 50
     };
@@ -57,6 +59,7 @@ svgTable = (function(){
     return {
         payout: 0,
         totalChipsCount: 0,
+        totalStacksCount: 0,
         matrix: null,
         settings: {
             // FIXME copy pasted const...
@@ -64,6 +67,8 @@ svgTable = (function(){
             winningNumber5frequency: 0.7,
             emptyBetFrequency: 0.4,
             moreThanOneFrequency: 0.3,
+            maxStacks: 12,
+            minPerStack: 1,
             maxPerStack: 10,
             maxTotal: 10
         },
@@ -81,6 +86,7 @@ svgTable = (function(){
             answerInput.value = '';
             answerInput.select();
             this.payout = 0;
+            this.totalStacksCount = 0;
             this.totalChipsCount = 0;
             this.settings.winningNumber = Math.random() > (1 - this.settings.winningNumber5frequency) ? 5 : 0;
             this.matrix = coords[this.settings.winningNumber];
@@ -128,7 +134,10 @@ svgTable = (function(){
                 return;
             }
 
-            this.addChips( randomIndex );
+            if ( this.totalStacksCount < this.settings.maxStacks ) {
+                this.addChips( randomIndex );
+                this.totalStacksCount++;
+            }
         },
         addChips: function( index ) {
             var count = 1;
@@ -140,11 +149,20 @@ svgTable = (function(){
                 count += Math.floor( Math.random() * (this.settings.maxPerStack-1) ) + 1;
             }
 
+
+            var minFill = this.settings.minPerStack - count;
+
+            if ( minFill > 0 ) {
+                count += minFill;
+            }
+
+
             var totalCountDiff = this.settings.maxTotal - this.totalChipsCount - count;
 
             if ( totalCountDiff < 0 ) {
                 count += totalCountDiff;
             }
+
 
             if ( count > 0 ) {
                 this.addChip( this.matrix[index], count );
@@ -217,7 +235,7 @@ function attachEvents() {
 
 
     var settings = [
-        "winningNumber5frequency", "emptyBetFrequency", "moreThanOneFrequency", "maxPerStack", "maxTotal"
+        "winningNumber5frequency", "emptyBetFrequency", "moreThanOneFrequency", "maxStacks", "minPerStack", "maxPerStack", "maxTotal"
     ];
 
     settings.forEach( function(settingName){
@@ -254,6 +272,39 @@ function attachEvents() {
         }
         return -1;
     };
+
+
+    // numpad
+    var numkeys = svgTable.doc.getElementsByClassName("numkey");
+
+    for ( var i = 0; i < numkeys.length; i++ ) {
+        var numkey = numkeys[i];
+        numkey.onclick = function( ev ) {
+            var answer = svgTable.$("answer");
+            answer.value = answer.value + ev.target.textContent;
+        };
+    }
+
+    svgTable.$("btC").onclick = function() {
+        svgTable.$("answer").value = "";
+    };
+
+    svgTable.$("btDel").onclick = function() {
+        var answer = svgTable.$("answer");
+        var val = answer.value;
+        answer.value = val.substr(0, val.length-1);
+    };
+
+    svgTable.$("btNPSettings").onclick = function() {
+        var modal = svgTable.$("modalSettings");
+        modal.style.display = "block";
+    };
+
+    svgTable.$("btNPResult").onclick = function() {
+        var modal = svgTable.$("modalResult");
+        modal.style.display = "block";
+    };
+
 
     window.onkeydown = function(ev) {
         var modalIndex = isModalOpen();
