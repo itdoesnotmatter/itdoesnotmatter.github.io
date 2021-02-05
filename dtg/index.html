@@ -5,6 +5,7 @@
 
   <title>&spades;A Dealer's Training Ground</title>
   <meta name="description" content="An app that helps you train calculating roulette payouts." />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <link rel="stylesheet" href="css/styles.css" />
   <script src="js/scripts.js"></script>
@@ -13,6 +14,20 @@
 <body onload="init()">
 <div class="container">
 <div class="mainview">
+    <div id="modalMenu" class="modal">
+        <div class="modal-content">
+            <span id="btCloseMenu" class="close">&times;</span>
+            <dl>
+                <dt>Roulette</dt>
+                    <dd data-hook="roulette_payout">Payout</dd>
+                    <dd data-hook="roulette_series">Callbets</dd>
+                <dt>Black Jack</dt>
+                    <dd>Payout</dd>
+                    <dd>Count</dd>
+            </dl>
+        </div>
+    </div>
+
     <div id="modalAbout" class="modal">
         <div class="modal-content">
             <span id="btCloseAbout" class="close">&times;</span>
@@ -110,6 +125,40 @@
         </div>
     </div>
 
+    <div id="modalSettingsSeries" class="modal">
+        <div class="modal-content">
+            <span id="btCloseSettingsSeries" class="close">&times;</span>
+            <!-- TODO sync preview defaults with js -->
+            <div>
+                <label for="settings-series-selectedSeries">Selected series:</label>
+                <div class="toggle-buttons">
+                <div class="toggle-buttons-container">
+                    <label class="toggle checked">tier<input class="toggle-series" type="checkbox" checked="checked"></input></label>
+                    <label class="toggle checked">orphelins<input class="toggle-series" type="checkbox" checked="checked"></input></label>
+                    <label class="toggle checked">vousins du zero<input class="toggle-series" type="checkbox" checked="checked"></input></label>
+                    <label class="toggle checked">0-spiel<input class="toggle-series" type="checkbox" checked="checked"></input></label>
+                </div>
+                </div>
+
+                <label for="settings-series-minBet">Min cash:</label><span id="preview-series-minBet" class="preview">100</span>
+                <div class="labeled-slider">
+                    <span class="left">series minimum</span><input type="range" min="-1" max="28" step="1" id="settings-series-minBet" name="settings-series-minBet"></input><span class="right">10 000</span>
+                </div>
+
+                <label for="settings-series-maxBet">Max cash:</label><span id="preview-series-maxBet" class="preview">500</span>
+                <div class="labeled-slider">
+                    <span class="left">50</span><input type="range" min="0" max="28" step="1" id="settings-series-maxBet" name="settings-series-maxBet"></input><span class="right">10 000</span>
+                </div>
+
+                <label for="settings-series-step">Step:</label><span id="preview-series-step" class="preview">10</span>
+                <div class="labeled-slider">
+                    <span class="left">5</span><input type="range" min="0" max="7" step="1" id="settings-series-step" name="settings-series-step"></input><span class="right">1 000</span>
+                </div>
+            </div>
+            <br />
+        </div>
+    </div>
+
     <div id="modalResult" class="modal">
         <div class="modal-content">
             <span id="btCloseResult" class="close">&times;</span>
@@ -128,7 +177,7 @@
 
     <div id="mainframe">
         <div id="tableframe">
-            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="80vw" viewBox="0 0 125 110" preserveAspectRatio="xMidYMid slice">
+            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 125 110" preserveAspectRatio="xMidYMid slice">
                 <defs>
                     <radialGradient id="tableGradient">
                         <stop offset="0%" stop-color="#090"/>
@@ -180,27 +229,37 @@
                         <text x="77.5"  y="93.5" text-anchor="middle"><tspan rotate="-90">4</tspan></text>
                         <text x="102.5" y="93.5" text-anchor="middle"><tspan rotate="-90">7</tspan></text>
                     </g>
-                    <g fill="brown" font-family="Arial" font-size="6" id="chips" />
+                    <g fill="brown" font-family="Arial" font-size="8" id="chips" />
                 </g>
             </svg>
         </div>
 
+        <div id="seriesframe" class="hidden">
+        <div id="seriesframe-container">
+            <p id="seriesName" class="series">Vousins du zero</p>
+            <p id="seriesMoney" class="value">$100</p>
+        </div>
+        </div>
+
         <div id="icons">
             <ul>
+                <li><a id="btMenu" title="Menu">&#9776;</a></li>
                 <li><a id="btAbout" title="About">&#9432;</a></li>
-                <li><a id="btShortcuts" title="Keyboard Shortcuts">&#x2328;</a></li>
-                <li><a id="btSettings" title="Settings">&#x2699;</a></li>
-                <li><a id="btResult" title="Show Result">?</a></li>
-                <li><a onclick="svgTable.refresh()" title="Next Puzzle">&#xbb;</a></li>
+                <li><a id="btAwesome"><div class="awesome"></div></a></li>
+                <div id="iconsHidden">
+                    <li><a id="btShortcuts" title="Keyboard Shortcuts">&#x2328;</a></li>
+                    <li><a id="btSettings" title="Settings">&#x2699;</a></li>
+                    <li><a id="btSettingsSeries" title="Settings">&#x2699;</a></li>
+                    <li><a id="btResult" title="Show Result">?</a></li>
+                    <li><a onclick="refreshCurrentPane()" title="Next Puzzle">&#xbb;</a></li>
+                </div>
             </ul>
         </div>
     </div>
 
     <div id="controls">
+    <div id="controls-container">
         <div id="numpad" class="grid">
-            <input id="answer" type="number" min="0" readonly="readonly" />
-            <button id="submit" type="button" onclick="svgTable.checkAnswer()">&gt;</button>
-
             <button class="numkey" type="button">7</button>
             <button class="numkey" type="button">8</button>
             <button class="numkey" type="button">9</button>
@@ -215,19 +274,26 @@
 
             <button id="btC" type="button" onclick="">C</button>
             <button class="numkey" type="button">0</button>
-            <button id="btDel" type="button" onclick="">&lt;-</button>
+            <button id="btDel" type="button" onclick="">&#8592;</button>
         </div>
         <div id="numpadcontrols" class="grid">
+            <input id="answer" class="answer preinput" type="number" min="1" readonly="readonly" />
+            <button id="submit" type="button" onclick="svgTable.checkAnswer()">&#8680;</button>
+
+            <input id="answer2" class="answer invisible control-series preinput" type="number" min="1" placeholder="Total Bet" readonly="readonly" />
+            <button id="submit2" class="invisible control-series" type="button" onclick="svgTable.checkAnswer()">&#8680;</button>
+
+            <input id="answer3" class="answer invisible control-series preinput" type="number" min="1" placeholder="Rest" readonly="readonly" />
+            <button id="submit3" class="invisible control-series" type="button" onclick="svgTable.checkAnswer()">&#8680;</button>
+
             <button id="btNPSettings" type="button">&#x2699;</button>
             <button id="btNPResult" type="button">?</button>
-            <button id="btNPNext" type="button" onclick="svgTable.refresh()">&#xbb;</button>
+            <button id="btNPNext" type="button" onclick="refreshCurrentPane()">&#xbb;</button>
         </div>
     </div>
-</div>
-</div>
-    <div class="footer">
-        <a id="btAwesome"><div class="awesome"></div></a>
     </div>
+</div>
+</div>
 </body>
 
 </html>

@@ -7,7 +7,7 @@ body {
 
 .container {
     display: flex;
-    height: 90vh;
+    height: 100vh;
 }
 
 .mainview {
@@ -18,30 +18,96 @@ body {
     display: flex;
 }
 
-#tableframe, #controls {
+svg {
+    width: 80vw;
+}
+
+@media screen and (min-width: 1000px) {
+    svg {
+        width: 60vw;
+    }
+}
+
+.hidden {
+    visibility: hidden;
+}
+
+.invisible {
+    display: none;
+}
+
+#seriesframe {
+    display: flex;
+    position: absolute;
+    width: 85vw;
+    height: 30vw;
+    background-image: radial-gradient( #090 15%, #040 70%);
+}
+
+@media screen and (min-width: 1000px) {
+    #seriesframe {
+        width: 60vw;
+    }
+}
+
+#seriesframe-container {
+    margin: auto;
+}
+
+p.series, p.value {
+    text-transform: uppercase;
+    font-family: sans-serif;
+    font-size: 22pt;
+    margin: 0;
+    margin-left: 30px;
+    padding: 5px 15px;
+}
+
+p.series {
+    border: 1px solid black;
+    background: black;
+    margin-top: 10px;
+}
+
+p.value {
+    border: 1px solid black;
+    background: red;
+}
+
+#tableframe, #seriesframe, #controls {
     text-align: center;
+}
+
+#controls {
+    margin-top: 5px;
+    display: flex;
+}
+
+#controls-container {
+    margin: auto;
 }
 
 #controls .grid {
     display: grid;
-    grid-template-columns: 15% 15% 15%;
-    grid-gap: 5px;
+    grid-template-columns: 30% 30% 30%;
+    grid-gap: 3px;
     justify-content: center;
 }
 
-#numpad, #numpadcontrols {
-    margin-top: 5px;
+#numpad {
+    float: left;
+    width: 50%;
+    height: 220px;
 }
 
-#answer {
-    -webkit-appearance: textfield;
-    grid-column: 1 / 3;
-    max-width: 100%;
-    font-size: 34pt;
+@media screen and (min-width: 1000px) {
+    #numpad, #numpadcontrols {
+        width: 200px;
+    }
 }
 
 #icons {
-    display: none;
+    /* display: none; */
     position: fixed;
     right: 0;
     margin-top: 5%;
@@ -49,13 +115,8 @@ body {
     font-size: 20pt;
 }
 
-.footer {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 10vh;
-    font-size: small;
+#iconsHidden {
+    display: none;
 }
 
 div.awesome {
@@ -76,7 +137,7 @@ ul {
 }
 
 li {
-    padding-top: 10px;
+    padding-top: 20px;
 }
 
 a {
@@ -87,6 +148,23 @@ a {
 input {
     border-color: gray;
     background-color: #0b0;
+    transition-duration: 0.2s;
+}
+
+input.preinput {
+    background-color: #eee;
+}
+
+input.hinted {
+    background-color: #f9d02f;
+}
+
+input.answer {
+    -webkit-appearance: textfield;
+    border-radius: 25%;
+    grid-column: 1 / 3;
+    width: 100%;
+    font-size: 16pt;
 }
 
 input.error {
@@ -94,12 +172,23 @@ input.error {
     background-color: #f99;
 }
 
-button {
+::placeholder {
+    font-size: 14pt;
+    color: gray;
+    opacity: 1;
+}
+
+#controls button {
     border-color: gray;
-    background-color: white;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    font-size: 34pt;
+    border-radius: 50%;
+    background-color: gray;
+    width: 50px;
+    height: 50px;
+    color: white;
+    font-size: 16pt;
+    text-align: center;
+    padding: 0;
+    touch-action: manipulation;
 }
 
 #submit {
@@ -107,7 +196,12 @@ button {
 }
 
 #btC, #btDel, #numpadcontrols button {
+    border-color: darkgray;
     background-color: darkgray;
+}
+
+button:active {
+    background-color: orange;
 }
 
 .modal {
@@ -126,14 +220,13 @@ button {
 
 .modal-content {
     background-color: #fefefe;
-    margin: 15% auto auto auto;
-    padding: 20px;
+    margin: auto;
     border: 1px solid #888;
-    width: 60%;
+    font-family: sans-serif;
 }
 
 #modalResult .modal-content {
-    width: 40%;
+    margin-top: 50%;
     text-align: center;
     font-size: 20pt;
 }
@@ -141,6 +234,23 @@ button {
     padding-left: 10px;
     color: maroon;
     font-size: 24pt;
+}
+
+@media screen and (min-width: 1000px) {
+    .modal-content {
+        margin: 15% auto auto auto;
+        padding: 20px;
+        width: 60%;
+    }
+
+    #modalResult .modal-content {
+        margin-top: 30%;
+        width: 40%;
+    }
+
+    #modalAwesome .modal-content {
+        width: 30%;
+    }
 }
 
 #modalShortcuts h1 {
@@ -165,13 +275,8 @@ button {
     text-align: center;
 }
 
-#modalSettings .modal-content {
-    width: 90%;
-}
-
 #modalAwesome .modal-content {
     margin-top: 20%;
-    width: 30%;
     text-align: center;
     background-color: white;
     animation-name: awesome;
@@ -187,8 +292,11 @@ button {
 
 .close {
     color: #aaa;
-    float: right;
-    font-size: 56px;
+    right: 0;
+    position: fixed;
+    margin-top: 5px;
+    margin-right: 5px;
+    font-size: 20pt;
     font-weight: bold;
 }
 
@@ -213,7 +321,38 @@ p.goodluck {
     justify-content: center;
 }
 
-#modalSettings label {
+#modalMenu {
+    font-family: sans-serif;
+}
+
+#modalMenu .modal-content {
+    background: #020;
+    color: white;
+}
+
+#modalMenu dt {
+    padding-top: 15px;
+    padding-bottom: 10px;
+    padding-left: 8px;
+    border: 1px solid white;
+    background: red;
+}
+
+#modalMenu dd {
+    padding-top: 15px;
+    padding-bottom: 10px;
+    padding-left: 30px;
+    margin: 0;
+    border: 1px solid white;
+    background: black;
+}
+
+#modalMenu dd:hover {
+    background: gray;
+    cursor: pointer;
+}
+
+#modalSettings label, #modalSettingsSeries label {
     padding-left: 5px;
     margin-top: 25px;
     margin-bottom: 5px;
@@ -244,4 +383,36 @@ p.goodluck {
 .preview {
     color: #666;
     padding-left: 10px;
+}
+
+div.toggle-buttons {
+    display: flex;
+}
+
+div.toggle-buttons-container {
+    display: flex;
+    margin: auto;
+}
+
+#modalSettingsSeries label.toggle {
+    display: inline-block;
+    padding: 3px 10px;
+    margin: 0 2px;
+    border: 1px solid black;
+    border-radius: 3px;
+    background-color: gray;
+    color: white;
+    text-transform: capitalize;
+    text-align: center;
+    font-family: sans-serif;
+}
+
+#modalSettingsSeries label.toggle.checked {
+    border-width: 2px;
+    background-color: orange;
+    color: black;
+}
+
+input[type="checkbox"] {
+    display: none;
 }
