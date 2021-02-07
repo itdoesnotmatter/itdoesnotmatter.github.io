@@ -12,10 +12,12 @@ body {
 
 .mainview {
     margin: auto;
+    position: relative;
 }
 
 #mainframe {
     display: flex;
+    position: relative;
 }
 
 svg {
@@ -25,6 +27,7 @@ svg {
 @media screen and (min-width: 1000px) {
     svg {
         width: 60vw;
+        max-width: 800px;
     }
 }
 
@@ -36,22 +39,18 @@ svg {
     display: none;
 }
 
-#seriesframe {
+#seriesframe, #bjframe {
     display: flex;
     position: absolute;
-    width: 85vw;
-    height: 30vw;
-    background-image: radial-gradient( #090 15%, #040 70%);
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient( #090 15%, #040 30%);
 }
 
-@media screen and (min-width: 1000px) {
-    #seriesframe {
-        width: 60vw;
-    }
-}
-
-#seriesframe-container {
+#seriesframe-container, #bjframe-container {
     margin: auto;
+    width: 80%;
+    max-width: 400px;
 }
 
 p.series, p.value {
@@ -59,14 +58,16 @@ p.series, p.value {
     font-family: sans-serif;
     font-size: 22pt;
     margin: 0;
-    margin-left: 30px;
     padding: 5px 15px;
 }
 
 p.series {
     border: 1px solid black;
     background: black;
-    margin-top: 10px;
+}
+
+p.series.narrow {
+    font-stretch: ultra-condensed;
 }
 
 p.value {
@@ -74,12 +75,12 @@ p.value {
     background: red;
 }
 
-#tableframe, #seriesframe, #controls {
+#tableframe, #seriesframe, #bjframe, #controls {
     text-align: center;
 }
 
 #controls {
-    margin-top: 5px;
+    margin-top: 15px;
     display: flex;
 }
 
@@ -107,12 +108,30 @@ p.value {
 }
 
 #icons {
-    /* display: none; */
-    position: fixed;
+    position: absolute;
+    top: 0;
     right: 0;
-    margin-top: 5%;
-    margin-right: 5%;
+    margin-top: 10px;
+    margin-right: 10px;
     font-size: 20pt;
+}
+
+@media screen and (max-width: 400px) {
+    #icons.top {
+        position: fixed;
+        width: 100%;
+        right: unset;
+        margin-right: unset;
+    }
+
+    #icons.top li {
+        display: inline-block;
+        padding: 0 30px;
+    }
+}
+
+#icons a[title="Menu"] {
+    font-size: 24pt;
 }
 
 #iconsHidden {
@@ -189,6 +208,7 @@ input.error {
     text-align: center;
     padding: 0;
     touch-action: manipulation;
+    cursor: pointer;
 }
 
 #submit {
@@ -214,19 +234,21 @@ button:active {
   height: 100%;
   overflow: auto;
   background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
   color: black;
 }
 
 .modal-content {
     background-color: #fefefe;
     margin: auto;
+    position: relative;
+    width: 100%;
+    max-width: 800px;
     border: 1px solid #888;
     font-family: sans-serif;
 }
 
 #modalResult .modal-content {
-    margin-top: 50%;
     text-align: center;
     font-size: 20pt;
 }
@@ -238,7 +260,6 @@ button:active {
 
 @media screen and (min-width: 1000px) {
     .modal-content {
-        margin: 15% auto auto auto;
         padding: 20px;
         width: 60%;
     }
@@ -276,7 +297,6 @@ button:active {
 }
 
 #modalAwesome .modal-content {
-    margin-top: 20%;
     text-align: center;
     background-color: white;
     animation-name: awesome;
@@ -293,11 +313,17 @@ button:active {
 .close {
     color: #aaa;
     right: 0;
-    position: fixed;
+    position: absolute;
     margin-top: 5px;
-    margin-right: 5px;
-    font-size: 20pt;
+    margin-right: 10px;
+    font-size: 22pt;
     font-weight: bold;
+}
+
+@media screen and (max-height: 500px) {
+    .close {
+        position: fixed;
+    }
 }
 
 .close:hover,
@@ -326,8 +352,12 @@ p.goodluck {
 }
 
 #modalMenu .modal-content {
-    background: #020;
     color: white;
+    padding: 0;
+}
+
+#modalMenu dl {
+    margin: 0;
 }
 
 #modalMenu dt {
@@ -336,6 +366,9 @@ p.goodluck {
     padding-left: 8px;
     border: 1px solid white;
     background: red;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 5px;
 }
 
 #modalMenu dd {
@@ -352,7 +385,7 @@ p.goodluck {
     cursor: pointer;
 }
 
-#modalSettings label, #modalSettingsSeries label {
+#modalSettings label, #modalSettingsSeries label, #modalSettingsBJ label {
     padding-left: 5px;
     margin-top: 25px;
     margin-bottom: 5px;
@@ -394,6 +427,7 @@ div.toggle-buttons-container {
     margin: auto;
 }
 
+#modalSettings label.toggle,
 #modalSettingsSeries label.toggle {
     display: inline-block;
     padding: 3px 10px;
@@ -405,8 +439,10 @@ div.toggle-buttons-container {
     text-transform: capitalize;
     text-align: center;
     font-family: sans-serif;
+    cursor: pointer;
 }
 
+#modalSettings label.toggle.checked,
 #modalSettingsSeries label.toggle.checked {
     border-width: 2px;
     background-color: orange;

@@ -22,7 +22,7 @@
                     <dd data-hook="roulette_payout">Payout</dd>
                     <dd data-hook="roulette_series">Callbets</dd>
                 <dt>Black Jack</dt>
-                    <dd>Payout</dd>
+                    <dd data-hook="blackjack_payout">Payout</dd>
                     <dd>Count</dd>
             </dl>
         </div>
@@ -86,9 +86,17 @@
         <div class="modal-content">
             <span id="btCloseSettings" class="close">&times;</span>
             <div>
-                <label for="settings-winningNumber5frequency">Winning number frequency:</label>
-                <div class="labeled-slider">
-                    <span>0</span><input type="range" min="0" max="1" step="0.1" id="settings-winningNumber5frequency" name="settings-winningNumber5frequency"></input><span>5</span>
+                <label for="settings-winningNumbers">Winning numbers:</label>
+                <div class="toggle-buttons">
+                <div class="toggle-buttons-container">
+                    <label class="toggle checked">0<input class="toggle-payout" type="checkbox" checked="checked"></input></label>
+                    <label class="toggle">1<input class="toggle-payout" type="checkbox" disabled="disabled"></input></label>
+                    <label class="toggle">2<input class="toggle-payout" type="checkbox" disabled="disabled"></input></label>
+                    <label class="toggle">3<input class="toggle-payout" type="checkbox" disabled="disabled"></input></label>
+                    <label class="toggle">4<input class="toggle-payout" type="checkbox" disabled="disabled"></input></label>
+                    <label class="toggle checked">5<input class="toggle-payout" type="checkbox" checked="checked"></input></label>
+                    <label class="toggle">6<input class="toggle-payout" type="checkbox" disabled="disabled"></input></label>
+                </div>
                 </div>
 
                 <label for="settings-emptyBetFrequency">Empty bet frequency:</label>
@@ -159,6 +167,30 @@
         </div>
     </div>
 
+    <div id="modalSettingsBJ" class="modal">
+        <div class="modal-content">
+            <span id="btCloseSettingsBJ" class="close">&times;</span>
+            <!-- TODO sync preview defaults with js -->
+            <div>
+                <label for="settings-bj-minBet">Min bet:</label><span id="preview-bj-minBet" class="preview">10</span>
+                <div class="labeled-slider">
+                    <span class="left">10</span><input type="range" min="10" max="300" step="10" id="settings-bj-minBet" name="settings-bj-minBet"></input><span class="right">300</span>
+                </div>
+
+                <label for="settings-bj-maxBet">Max bet:</label><span id="preview-bj-maxBet" class="preview">100</span>
+                <div class="labeled-slider">
+                    <span class="left">10</span><input type="range" min="10" max="300" step="10" id="settings-bj-maxBet" name="settings-bj-maxBet"></input><span class="right">300</span>
+                </div>
+
+                <label for="settings-bj-step">Step:</label><span id="preview-bj-step" class="preview">10</span>
+                <div class="labeled-slider">
+                    <span class="left">5</span><input type="range" min="5" max="100" step="5" id="settings-bj-step" name="settings-bj-step"></input><span class="right">100</span>
+                </div>
+            </div>
+            <br />
+        </div>
+    </div>
+
     <div id="modalResult" class="modal">
         <div class="modal-content">
             <span id="btCloseResult" class="close">&times;</span>
@@ -177,7 +209,7 @@
 
     <div id="mainframe">
         <div id="tableframe">
-            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 125 110" preserveAspectRatio="xMidYMid slice">
+            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 5 125 101" preserveAspectRatio="xMidYMid slice">
                 <defs>
                     <radialGradient id="tableGradient">
                         <stop offset="0%" stop-color="#090"/>
@@ -237,23 +269,16 @@
         <div id="seriesframe" class="hidden">
         <div id="seriesframe-container">
             <p id="seriesName" class="series">Vousins du zero</p>
-            <p id="seriesMoney" class="value">$100</p>
+            <p id="seriesMoney" class="value"></p>
         </div>
         </div>
 
-        <div id="icons">
-            <ul>
-                <li><a id="btMenu" title="Menu">&#9776;</a></li>
-                <li><a id="btAbout" title="About">&#9432;</a></li>
-                <li><a id="btAwesome"><div class="awesome"></div></a></li>
-                <div id="iconsHidden">
-                    <li><a id="btShortcuts" title="Keyboard Shortcuts">&#x2328;</a></li>
-                    <li><a id="btSettings" title="Settings">&#x2699;</a></li>
-                    <li><a id="btSettingsSeries" title="Settings">&#x2699;</a></li>
-                    <li><a id="btResult" title="Show Result">?</a></li>
-                    <li><a onclick="refreshCurrentPane()" title="Next Puzzle">&#xbb;</a></li>
-                </div>
-            </ul>
+        <div id="bjframe" class="hidden">
+        <div id="bjframe-container">
+            <!-- FIXME classname and dont uppercase -->
+            <p class="series">BJ on:</p>
+            <p id="bjMoney" class="value"></p>
+        </div>
         </div>
     </div>
 
@@ -277,7 +302,7 @@
             <button id="btDel" type="button" onclick="">&#8592;</button>
         </div>
         <div id="numpadcontrols" class="grid">
-            <input id="answer" class="answer preinput" type="number" min="1" readonly="readonly" />
+            <input id="answer" class="answer preinput" type="text" readonly="readonly" />
             <button id="submit" type="button" onclick="svgTable.checkAnswer()">&#8680;</button>
 
             <input id="answer2" class="answer invisible control-series preinput" type="number" min="1" placeholder="Total Bet" readonly="readonly" />
@@ -291,6 +316,23 @@
             <button id="btNPNext" type="button" onclick="refreshCurrentPane()">&#xbb;</button>
         </div>
     </div>
+    </div>
+
+    <div id="icons">
+        <ul>
+            <li><a id="btMenu" title="Menu">&#9776;</a></li>
+            <li><a id="btAbout" title="About">&#9432;</a></li>
+            <li><a id="btAwesome"><div class="awesome"></div></a></li>
+            <div id="iconsHidden">
+                <!-- FIXME remove legacy js code -->
+                <li><a id="btShortcuts" title="Keyboard Shortcuts">&#x2328;</a></li>
+                <li><a id="btSettings" title="Settings">&#x2699;</a></li>
+                <li><a id="btSettingsSeries" title="Settings">&#x2699;</a></li>
+                <li><a id="btSettingsBJ" title="Settings">&#x2699;</a></li>
+                <li><a id="btResult" title="Show Result">?</a></li>
+                <li><a onclick="refreshCurrentPane()" title="Next Puzzle">&#xbb;</a></li>
+            </div>
+        </ul>
     </div>
 </div>
 </div>

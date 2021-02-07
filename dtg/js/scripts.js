@@ -33,7 +33,6 @@ svgTable = (function(){
     };
     const defaults = {
         winningNumber: 5,
-        winningNumber5frequency: 0.7,
         emptyBetFrequency: 0.4,
         moreThanOneFrequency: 0.3,
         maxStacks: 12,
@@ -64,7 +63,7 @@ svgTable = (function(){
         settings: {
             // FIXME copy pasted const...
             winningNumber: 5,
-            winningNumber5frequency: 0.7,
+            winningNumbers: [ 0, 5 ],
             emptyBetFrequency: 0.4,
             moreThanOneFrequency: 0.3,
             maxStacks: 12,
@@ -86,7 +85,8 @@ svgTable = (function(){
 
             var hookToPane = {
                 roulette_payout: "tableframe",
-                roulette_series: "seriesframe"
+                roulette_series: "seriesframe",
+                blackjack_payout: "bjframe"
             }
             var pane = hookToPane[hook];
 
@@ -102,6 +102,7 @@ svgTable = (function(){
         _get_series_controls: function() {
             return this.doc.getElementsByClassName("control-series");
         },
+        // FIXME copy paste hook_blackjack_payout
         hook_roulette_payout: function() {
             var controls = this._get_series_controls();
 
@@ -110,6 +111,10 @@ svgTable = (function(){
             }
 
             this.$("answer").setAttribute("placeholder", "");
+            this.$("btDel").innerHTML = "&#8592;";
+            this.$("icons").classList.remove("top");
+
+            this.refresh();
         },
         hook_roulette_series: function() {
             var controls = this._get_series_controls();
@@ -120,6 +125,24 @@ svgTable = (function(){
 
             this.$("answer").setAttribute("placeholder", "Bet");
             this.$("answer").classList.add("preinput");
+            this.$("btDel").innerHTML = "&#8592;";
+            this.$("icons").classList.add("top");
+
+            series.refresh();
+        },
+        // FIXME copy paste hook_roulette_payout
+        hook_blackjack_payout: function() {
+            var controls = this._get_series_controls();
+
+            for ( var i = 0; i < controls.length; i++ ) {
+                controls[i].classList.add("invisible");
+            }
+
+            this.$("answer").setAttribute("placeholder", "");
+            this.$("btDel").textContent = ".50";
+            this.$("icons").classList.add("top");
+
+            bj.refresh();
         },
         $: function(id, doc) {
             return this.doc.getElementById( id );
@@ -137,7 +160,10 @@ svgTable = (function(){
             this.payout = 0;
             this.totalStacksCount = 0;
             this.totalChipsCount = 0;
-            this.settings.winningNumber = Math.random() > (1 - this.settings.winningNumber5frequency) ? 5 : 0;
+
+            var i = Math.floor( Math.random() * this.settings.winningNumbers.length );
+            this.settings.winningNumber = this.settings.winningNumbers[ i ];
+
             this.matrix = coords[this.settings.winningNumber];
             this.redraw();
         },
@@ -265,6 +291,9 @@ svgTable = (function(){
 
             return false;
         },
+        checkAnswer_blackjack_payout: function( answer ) {
+            return answer == bj.current.payout;
+        },
         correctAnswer_roulette_payout: function() {
             this.targetAnswer.classList.remove("error");
             this.targetAnswer.classList.remove("preinput");
@@ -288,6 +317,12 @@ svgTable = (function(){
                     setTimeout( function(){ series.refresh() }, 200 );
                     break;
             }
+        },
+        correctAnswer_blackjack_payout: function() {
+            this.targetAnswer.classList.remove("error");
+            this.targetAnswer.classList.remove("preinput");
+
+            setTimeout( function(){ bj.refresh() }, 200 );
         },
         checkAnswer: function() {
             var input = this.targetAnswer;
@@ -316,18 +351,18 @@ numpad = {
         svgTable.targetAnswer.value = svgTable.targetAnswer.value + digit;
     },
     increment: function(inc = 1) {
-        var val = Number.parseInt( svgTable.targetAnswer.value ) || 0;
-        svgTable.targetAnswer.value = val + inc;
+        var val = Number.parseFloat( svgTable.targetAnswer.value ) || 0;
+        svgTable.targetAnswer.value = (val + inc).toString();
     },
     decrement: function(inc = 1) {
-        var val = Number.parseInt( svgTable.targetAnswer.value ) || 0;
+        var val = Number.parseFloat( svgTable.targetAnswer.value ) || 0;
         val -= inc;
 
         if ( val < 1 ) {
             val = 1;
         }
 
-        svgTable.targetAnswer.value = val;
+        svgTable.targetAnswer.value = val.toString();
     }
 };
 
@@ -381,15 +416,26 @@ series = (function(){
             this.redraw();
         },
         redraw: function() {
-            svgTable.$("seriesName").textContent = this.current.series;
+            var visibleSeriesName = this.current.series;
+            var seriesNameElem = svgTable.$("seriesName");
+
+            seriesNameElem.classList.remove("narrow");
+
+            if ( visibleSeriesName == "vousins du zero" ) {
+                visibleSeriesName = "v. du zero";
+                seriesNameElem.classList.add("narrow");
+            }
+
+            seriesNameElem.textContent = visibleSeriesName;
+
             svgTable.$("seriesMoney").textContent = this.current.money;
             // FIXME copy-paste
             svgTable.$("answer").classList.add("preinput");
             svgTable.$("answer2").classList.add("preinput");
             svgTable.$("answer3").classList.add("preinput");
-            svgTable.$("answer").classList.remove("hinted");
-            svgTable.$("answer2").classList.remove("hinted");
-            svgTable.$("answer3").classList.remove("hinted");
+            svgTable.$("answer").classList.remove("hinted", "error");
+            svgTable.$("answer2").classList.remove("hinted", "error");
+            svgTable.$("answer3").classList.remove("hinted", "error");
             svgTable.$("answer").value = "";
             svgTable.$("answer2").value = "";
             svgTable.$("answer3").value = "";
@@ -398,9 +444,46 @@ series = (function(){
 })();
 
 
+bj = (function(){
+    return {
+        settings: {
+            minBet: 10,
+            maxBet: 100,
+            step: 10
+        },
+        current: {
+            money: null,
+            payout: null
+        },
+        next: function() {
+            var money = this.settings.minBet;
+
+            // FIXME copypaste
+            // minBet + randomSteps <= maxBet
+            var maxSteps = Math.floor((this.settings.maxBet - this.settings.minBet)/this.settings.step) + 1;
+            var randomSteps = this.settings.step * Math.floor(Math.random() * maxSteps);
+
+            this.current.money = money + randomSteps;
+            this.current.payout = this.current.money * 1.5;
+        },
+        refresh: function() {
+            this.next();
+            this.redraw();
+        },
+        redraw: function() {
+            var answerInput = svgTable.$("answer");
+            answerInput.classList.remove("error", "hinted");
+            answerInput.classList.add("preinput");
+            answerInput.value = '';
+            svgTable.$("bjMoney").textContent = this.current.money;
+        }
+    };
+})();
+
+
 function attachEvents() {
     var modals = [
-        "Menu", "About", "Shortcuts", "Settings", "SettingsSeries", "Result", "Awesome"
+        "Menu", "About", "Shortcuts", "Settings", "SettingsSeries", "SettingsBJ", "Result", "Awesome"
     ];
 
     modals.forEach( function(modalName){
@@ -409,7 +492,7 @@ function attachEvents() {
         var span = svgTable.$("btClose" + modalName);
 
         btn.onclick = function() {
-            modal.style.display = "block";
+            modal.style.display = "flex";
         };
         span.onclick =  function() {
             modal.style.display = "none";
@@ -418,7 +501,7 @@ function attachEvents() {
 
 
     var settings = [
-        "winningNumber5frequency", "emptyBetFrequency", "moreThanOneFrequency", "maxStacks", "minPerStack", "maxPerStack", "maxTotal"
+        "emptyBetFrequency", "moreThanOneFrequency", "maxStacks", "minPerStack", "maxPerStack", "maxTotal"
     ];
 
     settings.forEach( function(settingName){
@@ -434,17 +517,33 @@ function attachEvents() {
         }
 
         input.onchange = function(ev) {
-            svgTable.settings[settingName] = input.value;
+            svgTable.settings[settingName] = ev.target.value;
         }
     } );
 
 
-    var settingsSeries = [
-        "minBet", "maxBet"
+    var settingsBJ = [
+        "minBet", "maxBet", "step"
     ];
 
-    // settingsSeries.forEach( function(settingName){
-    // } );
+    settingsBJ.forEach( function(settingName){
+        var input = svgTable.$("settings-bj-" + settingName);
+        var preview = svgTable.$("preview-bj-" + settingName);
+
+        input.value = bj.settings[settingName].toString();
+
+        if ( preview != null ) {
+            input.oninput = function(ev) {
+                preview.textContent = ev.target.value;
+            }
+        }
+
+        input.onchange = function(ev) {
+            bj.settings[settingName] = Number.parseInt( ev.target.value );
+        }
+    } );
+
+
     // TODO validate min < max
     // FIXME copy paste!
     (function(){
@@ -595,7 +694,7 @@ function attachEvents() {
     var modals = svgTable.doc.getElementsByClassName("modal");
     var isModalOpen = function() {
         for ( var i = 0; i < modals.length; i++ ) {
-            if ( modals[i].style.display == "block" ) {
+            if ( modals[i].style.display == "flex" ) {
                 return i;
             }
         }
@@ -604,6 +703,7 @@ function attachEvents() {
 
 
     attachSeriesToggleEvents();
+    attachPayoutToggleEvents();
     attachMenuHooks();
 
 
@@ -617,7 +717,14 @@ function attachEvents() {
     }
 
     svgTable.$("btC").onclick = numpad.clear;
-    svgTable.$("btDel").onclick = numpad.del;
+    svgTable.$("btDel").onclick = function() {
+        if ( svgTable.currentHook == "blackjack_payout" ) {
+            numpad.append(".5");
+        }
+        else {
+            numpad.del();
+        }
+    };
 
     svgTable.$("btNPSettings").onclick = function() {
         var modal;
@@ -629,9 +736,12 @@ function attachEvents() {
             case "roulette_series":
                 modal = svgTable.$("modalSettingsSeries");
                 break;
+            case "blackjack_payout":
+                modal = svgTable.$("modalSettingsBJ");
+                break;
         }
 
-        modal.style.display = "block";
+        modal.style.display = "flex";
     };
 
     svgTable.$("btNPResult").onclick = function() {
@@ -656,6 +766,11 @@ function attachEvents() {
                 // FIXME dont like it... so that only one click on answer is needed
                 svgTable.targetAnswer = svgTable.$("answer3");
                 break;
+            case "blackjack_payout":
+                svgTable.targetAnswer.value = bj.current.payout;
+                svgTable.targetAnswer.classList.remove("error", "preinput");
+                svgTable.targetAnswer.classList.add("hinted");
+                break;
         }
     };
 
@@ -677,13 +792,13 @@ function attachEvents() {
                     refreshCurrentPane();
                     break;
                 case "i":
-                    modals.namedItem("modalAbout").style.display = "block";
+                    modals.namedItem("modalAbout").style.display = "flex";
                     break;
                 case "s":
-                    modals.namedItem("modalSettings").style.display = "block";
+                    modals.namedItem("modalSettings").style.display = "flex";
                     break;
                 case "k":
-                    modals.namedItem("modalShortcuts").style.display = "block";
+                    modals.namedItem("modalShortcuts").style.display = "flex";
                     break;
                 case "c":
                     svgTable.switchPane("roulette_series");
@@ -691,10 +806,13 @@ function attachEvents() {
                 case "p":
                     svgTable.switchPane("roulette_payout");
                     break;
+                case "b":
+                    svgTable.switchPane("blackjack_payout");
+                    break;
                 case "r":
                 case "a":
                 case "?":
-                    modals.namedItem("modalResult").style.display = "block";
+                    modals.namedItem("modalResult").style.display = "flex";
                     break;
                 case "Delete":
                     numpad.clear();
@@ -713,6 +831,12 @@ function attachEvents() {
                     break;
                 case "ArrowLeft":
                     numpad.decrement(10);
+                    break;
+                case ".":
+                case ",":
+                    if ( svgTable.currentHook == "blackjack_payout" ) {
+                        numpad.append(".");
+                    }
                     break;
                 default:
                     if ( !isNaN(Number.parseInt(ev.key)) ) {
@@ -769,6 +893,39 @@ function attachSeriesToggleEvents() {
     }
 }
 
+function attachPayoutToggleEvents() {
+    var checkboxes = svgTable.$("modalSettings").getElementsByClassName("toggle-payout");
+
+    for ( var i = 0; i < checkboxes.length; i++ ) {
+        var checkbox = checkboxes[i];
+
+        // revert after page soft reload
+        switch (checkbox.labels[0].textContent) {
+            case "0":
+            case "5":
+                checkbox.checked = true;
+                break;
+            default:
+                checkbox.checked = false;
+        }
+
+        checkbox.onchange = function( ev ) {
+            var s = ev.target.labels[0].textContent;
+            s = Number.parseInt( s );
+
+            if ( ev.target.checked ) {
+                svgTable.settings.winningNumbers.push( s );
+                ev.target.parentNode.classList.add("checked");
+            }
+            else {
+                var i = svgTable.settings.winningNumbers.indexOf( s );
+                svgTable.settings.winningNumbers.splice( i, 1 );
+                ev.target.parentNode.classList.remove("checked");
+            }
+        }
+    }
+}
+
 function refreshCurrentPane() {
     switch ( svgTable.currentHook ) {
         case "roulette_payout":
@@ -777,6 +934,9 @@ function refreshCurrentPane() {
         case "roulette_series":
             svgTable.targetAnswer = svgTable.$("answer");
             series.refresh();
+            break;
+        case "blackjack_payout":
+            bj.refresh();
             break;
     }
 }
@@ -791,4 +951,5 @@ function init() {
     svgTable.targetAnswer = svgTable.$("answer");
 
     series.refresh();
+    bj.refresh();
 }
